@@ -62,6 +62,21 @@
       font-size: 14px;
     }
 
+    .search { display: flex; gap: 8px; margin-bottom: 8px; }
+    .search input { flex: 1; min-width: 0; padding: 10px 14px; font-size: 16px; border: 2px solid #fed7aa; border-radius: 10px; }
+    .search button { padding: 10px 18px; font-size: 16px; border: none; border-radius: 10px; background: #ea580c; color: #fff; cursor: pointer; }
+    .search button:hover { background: #c2410c; }
+    .msg { min-height: 22px; margin: 0 0 8px; color: #b91c1c; font-size: 14px; }
+    .slider { position: relative; display: none; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 12px; background: #000; }
+    .slider img { width: 100%; height: 100%; object-fit: contain; }
+    .arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; padding: 0; border: none; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 20px; cursor: pointer; }
+    .arrow:hover { background: rgba(0,0,0,.75); }
+    #prev { left: 10px; }
+    #next { right: 10px; }
+    .counter { position: absolute; right: 12px; bottom: 10px; padding: 2px 10px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-size: 13px; }
+    .caption { margin: 8px 0 0; text-align: center; font-size: 13px; color: #78716c; }
+    .caption a { color: #c2410c; }
+
     @media (max-width: 720px) {
       .middle { grid-template-columns: 1fr; }
     }
@@ -97,6 +112,22 @@
           </div>
         </section>
 
+        <section id="gallery">
+          <h2>🖼️ 제주 사진 슬라이드</h2>
+          <form id="searchForm" class="search">
+            <input id="q" type="text" placeholder="검색어 (예: 제주, 귤, 바다)" required>
+            <button type="submit">검색</button>
+          </form>
+          <p id="msg" class="msg"></p>
+          <div id="slider" class="slider">
+            <img id="photo" alt="">
+            <button type="button" class="arrow" id="prev" aria-label="이전">◀</button>
+            <button type="button" class="arrow" id="next" aria-label="다음">▶</button>
+            <span class="counter" id="counter"></span>
+          </div>
+          <p id="caption" class="caption"></p>
+        </section>
+
         <article id="story">
           <h2>📖 제주 감귤 이야기</h2>
           <p>따뜻한 기후와 화산토 덕분에 제주는 감귤이 자라기 좋은 땅이에요. 노지 감귤은 보통 늦가을부터 겨울에 제철을 맞고, 한라봉 같은 만감류는 겨울에서 봄까지 이어집니다.</p>
@@ -122,5 +153,39 @@
       © 2026 제주 특산물 이야기 · 🌊 제주의 맛을 전합니다
     </footer>
   </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let hits = [];
+    let index = 0;
+
+    $('searchForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('msg').textContent = '불러오는 중...';
+      try {
+        const res = await fetch('/api/pixabay?q=' + encodeURIComponent($('q').value.trim()));
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `오류 (${res.status})`);
+        if (!data.hits.length) throw new Error('검색 결과가 없어요.');
+        hits = data.hits;
+        index = 0;
+        $('msg').textContent = '';
+        $('slider').style.display = 'block';
+        show();
+      } catch (err) {
+        $('msg').textContent = err.message;
+      }
+    });
+
+    function show() {
+      const h = hits[index];
+      $('photo').src = h.url;
+      $('photo').alt = h.tags;
+      $('counter').textContent = `${index + 1} / ${hits.length}`;
+      $('caption').innerHTML = `📷 <a href="${h.pageURL}" target="_blank" rel="noopener">${h.user}</a> · Pixabay`;
+    }
+    $('prev').addEventListener('click', () => { index = (index - 1 + hits.length) % hits.length; show(); });
+    $('next').addEventListener('click', () => { index = (index + 1) % hits.length; show(); });
+  </script>
 </body>
 </html>
