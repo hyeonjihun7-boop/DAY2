@@ -10,13 +10,14 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: '검색어를 입력해 주세요.' });
   }
 
-  const url = `https://pixabay.com/api/?key=${encodeURIComponent(key)}&q=${encodeURIComponent(q)}&image_type=photo&per_page=10`;
+  const url = `https://pixabay.com/api/?key=${encodeURIComponent(key)}&q=${encodeURIComponent(q)}&image_type=photo&lang=ko&per_page=10`;
   try {
     const r = await fetch(url);
     if (!r.ok) return res.status(r.status).json({ error: `Pixabay 오류 (${r.status})` });
     const data = await r.json();
     const hits = data.hits.map((h) => ({
       url: h.largeImageURL,
+      thumb: h.webformatURL,
       tags: h.tags,
       user: h.user,
       pageURL: h.pageURL,
