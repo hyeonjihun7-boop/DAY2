@@ -172,6 +172,7 @@
         $('msg').textContent = '';
         $('slider').style.display = 'block';
         show();
+        play();
       } catch (err) {
         $('msg').textContent = err.message;
       }
@@ -184,8 +185,13 @@
       $('counter').textContent = `${index + 1} / ${hits.length}`;
       $('caption').innerHTML = `📷 <a href="${h.pageURL}" target="_blank" rel="noopener">${h.user}</a> · Pixabay`;
     }
-    $('prev').addEventListener('click', () => { index = (index - 1 + hits.length) % hits.length; show(); });
-    $('next').addEventListener('click', () => { index = (index + 1) % hits.length; show(); });
+    let timer = null;
+    function play() {
+      clearInterval(timer);
+      timer = setInterval(() => { index = (index + 1) % hits.length; show(); }, 500);
+    }
+    $('prev').addEventListener('click', () => { index = (index - 1 + hits.length) % hits.length; show(); play(); });
+    $('next').addEventListener('click', () => { index = (index + 1) % hits.length; show(); play(); });
   </script>
 </body>
 </html>
