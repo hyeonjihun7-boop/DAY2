@@ -188,7 +188,7 @@
     let timer = null;
     function play() {
       clearInterval(timer);
-      timer = setInterval(() => { index = (index + 1) % hits.length; show(); }, 500);
+      timer = setInterval(() => { index = (index + 1) % hits.length; show(); }, 3000);
     }
     $('prev').addEventListener('click', () => { index = (index - 1 + hits.length) % hits.length; show(); play(); });
     $('next').addEventListener('click', () => { index = (index + 1) % hits.length; show(); play(); });
